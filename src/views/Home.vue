@@ -33,11 +33,7 @@
       </div>
       <!-- Playlist -->
       <ol id="playlist">
-        <app-song-item
-          v-for="song in songs"
-          :key="song.doID"
-          :song="song"
-        />
+        <app-song-item v-for="song in songs" :key="song.doID" :song="song" />
       </ol>
       <!-- .. end Playlist -->
     </div>
@@ -57,6 +53,8 @@ export default {
   data() {
     return {
       songs: [],
+      maxPerPage: 3,
+      pendingRequest: false,
     };
   },
   async created() {
@@ -74,17 +72,39 @@ export default {
       const bottomOfWindow = Math.round(scrollTop) + innerHeight === offsetHeight;
 
       if (bottomOfWindow) {
-        console.log('bottom of window');
+        this.getSongs();
       }
     },
     async getSongs() {
-      const snapshots = await songsCollection.get();
+      if (this.pendingRequest) {
+        return;
+      }
+      this.pendingRequest = true;
+
+      let snapshots;
+      const songsLength = this.songs.length - 1;
+      if (songsLength > 0) {
+        const lastDoc = await songsCollection
+          .doc(this.songs[songsLength].docID)
+          .get();
+        snapshots = await songsCollection
+          .orderBy('modified_name')
+          .startAfter(lastDoc)
+          .limit(this.maxPerPage)
+          .get();
+      } else {
+        snapshots = await songsCollection
+          .orderBy('modified_name')
+          .limit(this.maxPerPage)
+          .get();
+      }
       snapshots.forEach((doc) => {
         this.songs.push({
           docID: doc.id,
           ...doc.data(),
         });
       });
+      this.pendingRequest = false;
     },
   },
 };
