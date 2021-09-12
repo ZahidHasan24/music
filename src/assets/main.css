@@ -19,7 +19,11 @@ a {
   
   .top-neg-8 {
     top: -8px;
-  } 
+  }
+  
+  .top-neg-10 {
+    top: -10px;
+  }
   
   .player-song-info {
     margin-top: -24px;

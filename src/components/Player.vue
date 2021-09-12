@@ -39,7 +39,7 @@
           mt-1
         "
       >
-        <span class="player-currenttime">00:00</span>
+        <span class="player-currenttime">{{ seek }}</span>
       </div>
       <!-- Scrub -->
       <div class="float-left w-7 h-7 leading-3 ml-7 mt-2 player-scrub">
@@ -52,9 +52,12 @@
             mx-auto
             player-song-info
           "
+          v-if="currentSong.modified_name"
         >
-          <span class="song-title">Song Title</span> by
-          <span class="song-artist">Artist</span>
+          <span class="song-title">{{ currentSong.modified_name }}</span> by
+          <span class="song-artist">
+            (Uploaded by {{ currentSong.display_name }})
+          </span>
         </div>
         <!-- Scrub Container  -->
         <span
@@ -72,8 +75,8 @@
         >
           <!-- Player Ball -->
           <span
-            class="absolute top-neg-8 text-gray-800 text-lg"
-            style="left: 50%"
+            class="absolute top-neg-10 text-gray-800 text-lg"
+            :style="{ left: playerProgress }"
           >
             <i class="fas fa-circle"></i>
           </span>
@@ -87,7 +90,7 @@
               from-green-500
               to-green-400
             "
-            style="width: 50%"
+            :style="{ width: playerProgress }"
           ></span>
         </span>
       </div>
@@ -106,19 +109,20 @@
           mt-1
         "
       >
-        <span class="player-duration">03:06</span>
+        <span class="player-duration">{{ duration }}</span>
       </div>
     </div>
   </div>
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex';
+import { mapActions, mapGetters, mapState } from 'vuex';
 
 export default {
   name: 'Player',
   computed: {
     ...mapGetters(['playing']),
+    ...mapState(['seek', 'duration', 'playerProgress', 'currentSong']),
   },
   methods: {
     ...mapActions(['toggleAudio']),
